@@ -1,4 +1,4 @@
-# ServiceClient
+# Rest Service Client
 
 ## Installation
 
@@ -10,11 +10,11 @@ gem 'rest-service-client'
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
 Or install it yourself as:
 
-    $ gem install service-client
+    $ gem install rest-service-client
 
 ## Usage
 Add this line to top of your file
