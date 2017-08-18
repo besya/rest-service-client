@@ -1,8 +1,6 @@
 require 'rest-client'
 require 'json'
 
-require File.dirname(__FILE__) + '/serviceclient/version'
-
 module ServiceClient
   def self.included(base)
     base.extend(ClassMethods)
