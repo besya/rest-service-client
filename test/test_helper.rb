@@ -1,4 +1,3 @@
-$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "service_client"
-
-require "minitest/autorun"
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'service_client'
+require 'minitest/autorun'

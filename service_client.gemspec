@@ -3,10 +3,10 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require_relative 'lib/service_client/version'
+require_relative 'lib/service-client/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'service_client'
+  spec.name          = 'service-client'
   spec.version       = ServiceClient::VERSION
   spec.authors       = ['Igor Bespalov']
   spec.email         = ['gravisbesya@list.ru']
