@@ -1,7 +1,7 @@
 require 'rest-client'
 require 'json'
 
-module ServiceClient
+module RestServiceClient
   def self.included(base)
     base.extend(ClassMethods)
   end

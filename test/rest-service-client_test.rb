@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ServiceClientTest < Minitest::Test
   class TestingService
-    include ServiceClient
+    include RestServiceClient
 
     host 'https://jsonplaceholder.typicode.com'
 
@@ -24,7 +24,7 @@ class ServiceClientTest < Minitest::Test
   }.freeze
 
   def test_that_it_has_a_version_number
-    refute_nil ::ServiceClient::VERSION
+    refute_nil ::RestServiceClient::VERSION
   end
 
   def test_dsl_generates_get_method

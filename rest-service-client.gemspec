@@ -3,16 +3,16 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require File.dirname(__FILE__) + '/lib/serviceclient/version'
+require File.dirname(__FILE__) + '/lib/restserviceclient/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'service-client'
-  spec.version       = ServiceClient::VERSION
+  spec.name          = 'rest-service-client'
+  spec.version       = RestServiceClient::VERSION
   spec.authors       = ['Igor Bespalov']
   spec.email         = ['gravisbesya@list.ru']
 
   spec.summary       = 'DSL for rest-client'
-  spec.homepage      = 'https://github.com/besya/service_client'
+  spec.homepage      = 'https://github.com/besya/rest-service-client'
   spec.license       = 'MIT'
 
   spec.files = `git ls-files -z`.split("\0").reject do |f|

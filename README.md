@@ -5,7 +5,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'service-client'
+gem 'rest-service-client'
 ```
 
 And then execute:
@@ -19,13 +19,13 @@ Or install it yourself as:
 ## Usage
 Add this line to top of your file
 ```ruby
-require 'service-client'
+require 'rest-service-client'
 ````
 
-Create a class, include the ServiceClient and configure your service
+Create a class, include the RestServiceClient and configure your service
 ```ruby
 class MyAwesomeService
-    include ServiceClient
+    include RestServiceClient
   
     # Sets the host url
     # You can use MyAwesomeService.new('https://jsonplaceholder.typicode.com')
@@ -64,7 +64,7 @@ end
 ### Simple Service
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   
   host 'https://jsonplaceholder.typicode.com'
   
@@ -90,7 +90,7 @@ p service.photo(id: 10)['id']
 
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
   get :photo, '/photos/:id', { id: 1 }
 end
@@ -102,7 +102,7 @@ p service.photo(id: 2)['id']  # 2
 
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
   
   get :first_photo, '/photos/1', {}, { Authentication: 'my-token' }
@@ -127,7 +127,7 @@ p photo['albumId'] # 1
 ### DELETE
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
   delete :delete_photo, '/photos/:id'
 end
@@ -139,7 +139,7 @@ service.delete_photo id: 1
 ### POST
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
   post :add_photo, '/photos'
 end
@@ -168,7 +168,7 @@ p service.add_photo payload: photo
 ### PATCH
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
   patch :update_photo_data, '/photos/:id'
 end
@@ -186,7 +186,7 @@ You can debug mode on for see what is happening
 
 ```ruby
 class SimpleService
-  include ServiceClient
+  include RestServiceClient
   debug true
   host 'https://jsonplaceholder.typicode.com'
   headers key1: 'value1', 'key2': 'value2'
@@ -225,7 +225,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/besya/service_client. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/besya/rest-service-client. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
