@@ -1,6 +1,6 @@
-require "service_client/version"
-require "rest-client"
-require "json"
+require_relative './service_client/version'
+require 'rest-client'
+require 'json'
 
 module ServiceClient
   def self.included(base)
@@ -34,12 +34,12 @@ module ServiceClient
 
   def make_request(http_method, endpoint, payload = {}, headers = {})
     case http_method
-      when :get then  RestClient.get(endpoint, headers)
-      when :post then RestClient.post(endpoint, payload, headers)
-      when :put then RestClient.put(endpoint, payload, headers)
-      when :patch then RestClient.patch(endpoint, payload, headers)
-      when :delete then RestClient.delete(endpoint)
-      else throw Exception.new("Method #{http_method} doesn't supported.")
+    when :get then  RestClient.get(endpoint, headers)
+    when :post then RestClient.post(endpoint, payload, headers)
+    when :put then RestClient.put(endpoint, payload, headers)
+    when :patch then RestClient.patch(endpoint, payload, headers)
+    when :delete then RestClient.delete(endpoint)
+    else throw Exception.new("Method #{http_method} doesn't supported.")
     end
   end
   private :make_request
