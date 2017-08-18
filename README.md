@@ -1,4 +1,6 @@
 # Rest Service Client
+[![Gem Version](https://badge.fury.io/rb/rest-service-client.svg)](https://badge.fury.io/rb/rest-service-client)
+
 
 ## Installation
 
