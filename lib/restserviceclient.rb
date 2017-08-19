@@ -64,33 +64,39 @@ module RestServiceClient
       define_method :get_debug, &-> { flag }
     end
 
-    def get(method_name, path = '', default_params = {}, default_headers = {}, default_payload = {})
-      add_method :get, method_name, path, default_params, default_headers, default_payload
+    def get(method_name, path = '', options = {})
+      add_method :get, method_name, path, options
     end
 
-    def post(method_name, path = '', default_params = {}, default_headers = {}, default_payload = {})
-      add_method :post, method_name, path, default_params, default_headers, default_payload
+    def post(method_name, path = '', options = {})
+      add_method :post, method_name, path, options
     end
 
-    def put(method_name, path = '', default_params = {}, default_headers = {}, default_payload = {})
-      add_method :put, method_name, path, default_params, default_headers, default_payload
+    def put(method_name, path = '', options = {})
+      add_method :put, method_name, path, options
     end
 
-    def patch(method_name, path = '', default_params = {}, default_headers = {}, default_payload = {})
-      add_method :patch, method_name, path, default_params, default_headers, default_payload
+    def patch(method_name, path = '', options = {})
+      add_method :patch, method_name, path, options
     end
 
-    def delete(method_name, path = '', default_params = {}, default_headers = {}, default_payload = {})
-      add_method :delete, method_name, path, default_params, default_headers, default_payload
+    def delete(method_name, path = '', options = {})
+      add_method :delete, method_name, path, options
     end
 
     private
 
-    def add_method(http_method, method_name, path, default_params, default_headers, default_payload)
+    # default_params, default_headers, default_payload, serializer
+    def add_method(http_method, method_name, path, options)
       define_method method_name do |headers: {}, payload: {}, parameters: {}, **params|
-        params = @default_params.merge(default_params.merge(params.merge(parameters)))
-        headers = @default_headers.merge(default_headers.merge(headers))
-        payload = default_payload.merge payload
+        options_params = options.fetch(:params, {})
+        options_headers = options.fetch(:headers, {})
+        options_payload = options.fetch(:payload, {})
+        serializer = options.fetch(:serializer, @serializer)
+
+        params = @default_params.merge(options_params.merge(params.merge(parameters)))
+        headers = @default_headers.merge(options_headers.merge(headers))
+        payload = options_payload.merge payload
 
         uri = path.clone
 
@@ -120,7 +126,7 @@ module RestServiceClient
           puts
         end
 
-        @serializer.deserialize(response.body)
+        serializer.deserialize(response.body)
       end
     end
   end

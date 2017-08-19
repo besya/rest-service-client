@@ -34,7 +34,7 @@ class MyAwesomeService
 
     # Sets the default headers for every requests.
     # Will be replaced using: MyAwesomeService.new.find_photo(id: 1, headers: { 'Authorization' => 'Bearer 123456' })
-    headers 'Authorization' => 'OAuth 1111|111'
+    headers Authorization: 'OAuth 1111|111'
 
     # Sets the default params for every requests.
     # Will be replaced using: MyAwesomeService.new.find_photo(id: 20)
@@ -92,7 +92,7 @@ p service.photo(id: 10)['id']
 class SimpleService
   include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
-  get :photo, '/photos/:id', { id: 1 }
+  get :photo, '/photos/:id', params: { id: 1 }
 end
 
 service = SimpleService.new
@@ -104,8 +104,7 @@ p service.photo(id: 2)['id']  # 2
 class SimpleService
   include RestServiceClient
   host 'https://jsonplaceholder.typicode.com'
-  
-  get :first_photo, '/photos/1', {}, { Authentication: 'my-token' }
+  get :first_photo, '/photos/1', headers: { Authentication: 'my-token' }
 end
 
 service = SimpleService.new
@@ -189,8 +188,12 @@ class SimpleService
   include RestServiceClient
   debug true
   host 'https://jsonplaceholder.typicode.com'
-  headers key1: 'value1', 'key2': 'value2'
-  get :photo, '/photos/1'
+  headers key1: 'value1', 'key2' => 'value2'
+  get :photo, 
+      '/photos/:id', 
+      params: { id: 1 }, 
+      headers: { key3: 'value3' },
+      payload: { data: { type: 'get_photo_by_id' }}
 end
 
 service = SimpleService.new
@@ -199,8 +202,8 @@ service.photo
  ______
 |
 |  SimpleService is processing GET request to https://jsonplaceholder.typicode.com/photos/1
-|    Headers: {:key1=>"value1", :key2=>"value2"}
-|    Payload: {}
+|    Headers: {:key1=>"value1", "key2"=>"value2", :key3=>"value3"}
+|    Payload: {:data=>{:type=>"get_photo_by_id"}}
 |
 |  SimpleService is processing the response on GET request to https://jsonplaceholder.typicode.com/photos/1
 |    Status: 200
@@ -215,7 +218,84 @@ service.photo
 =end
 
 ```
+## Serializer
 
+By the default RestServiceClient uses JSON serializer and returns the arrays and hashes
+with key as string
+
+You can use custom serializer.
+For do this, create a serializer class with `self.deserialize` method which 
+gets the one argument with response body and returns whatever you want.
+
+And you need to add your serializer to your service using: 
+`serializer MyAwesomSerializer`
+
+### Example
+```ruby
+  class Photo
+    attr_accessor :id, :title, :album_id
+  end
+
+  class PhotoSerializer
+    class Object::String
+      def underscore
+        gsub(/::/, '/')
+          .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+          .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+          .tr('-', '_')
+          .downcase
+      end
+    end
+
+    def self.deserialize(json)
+      data = JSON.parse(json)
+
+      return build_photo(data) if data.is_a? Hash
+      return data.map { |p| build_photo(p) } if data.is_a? Array
+    end
+
+    def self.build_photo(data)
+      object = Photo.new
+      data.each_with_object(object) do |(k, v), o|
+        setter = "#{k.underscore}=".to_sym
+        o.send(setter, v) if o.respond_to?(setter)
+      end
+      object
+    end
+  end
+
+  class Post
+    attr_accessor :id, :title, :user_id
+  end
+
+  class PostSerializer
+    def self.deserialize(json)
+      data = JSON.parse(json)
+      object = Post.new
+      object.id = data['id']
+      object.title = data['title']
+      object.user_id = data['userId']
+      object
+    end
+  end
+
+
+  class MyService
+    include RestServiceClient
+    host 'https://jsonplaceholder.typicode.com'
+    serializer PhotoSerializer
+    get :photos, '/photos'
+    get :find_photo, '/photos/:id'
+    get :find_post, '/posts/:id', serializer: PostSerializer
+  end
+
+  service = MyService.new
+
+  p service.find_photo(id: 1).album_id # 1
+  p service.photos.find { |p| p.id == 3 }.id # 1
+  p service.find_post(id: 1).user_id # 1
+
+``` 
 
 ## Development
 
