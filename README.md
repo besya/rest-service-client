@@ -77,13 +77,13 @@ end
 
 service = SimpleService.new
 
-p service.first_photo['id']
+p service.first_photo.result['id']
 # 1
 
-p service.second_photo['id']
+p service.second_photo.result['id']
 # 2
 
-p service.photo(id: 10)['id']
+p service.photo(id: 10).result['id']
 # 10
 
 ```
@@ -98,8 +98,8 @@ class SimpleService
 end
 
 service = SimpleService.new
-p service.photo['id']         # 1
-p service.photo(id: 2)['id']  # 2
+p service.photo.result['id']         # 1
+p service.photo(id: 2).result['id']  # 2
 ```
 
 ```ruby
@@ -112,7 +112,7 @@ end
 service = SimpleService.new
 # Sends the request to 'https://jsonplaceholder.typicode.com/photos/1'
 # includes Headers: { 'Authentication': 'my-token' }
-p service.first_photo['albumId'] # 1
+p service.first_photo.result['albumId'] # 1
 
 # Sends the request to 'https://jsonplaceholder.typicode.com/photos/1'
 # includes Headers: { 
@@ -120,7 +120,7 @@ p service.first_photo['albumId'] # 1
 #   'AnotherHeaderKey': 'AnotherHeaderValue' 
 # }
 another_headers = { AnotherHeaderKey: 'AnotherHeaderValue' }
-photo = service.first_photo(headers: another_headers)
+photo = service.first_photo(headers: another_headers).result
 p photo['albumId'] # 1
 
 ```
@@ -134,7 +134,7 @@ class SimpleService
 end
 
 service = SimpleService.new
-service.delete_photo id: 1
+service.delete_photo(id: 1).result
 ```
 
 ### POST
@@ -152,7 +152,10 @@ photo = {
     url: 'http://placehold.it/600/92c952',
     thumbnailUrl: 'http://placehold.it/150/92c952'
 }
-p service.add_photo payload: photo
+response = service.add_photo(payload: photo)
+p response.status # 201
+p response.headers # {:date=>"...}
+p response.result
 =begin
 {
   "albumId"=>1,
@@ -176,7 +179,7 @@ end
 
 service = SimpleService.new
 updated_photo = service.update_photo_data id: 1, payload: { title: 'new title'}
-p updated_photo['title']
+p updated_photo.result['title']
 # "new title"
 
 ```
@@ -199,7 +202,7 @@ class SimpleService
 end
 
 service = SimpleService.new
-service.photo
+service.photo.result
 =begin
  ______
 |
@@ -232,6 +235,22 @@ gets the one argument with response body and returns whatever you want.
 And you need to add your serializer to your service using: 
 `serializer MyAwesomSerializer`
 
+## Errors
+
+```ruby
+class SimpleService
+  include RestServiceClient
+  debug true
+  host 'https://jsonplaceholder.typicode.com'
+  get :bad_url, '/bad_url'
+end
+
+service = SimpleService.new
+response = service.bad_url
+p response.status # 404
+p response.message # "404 Not Found"
+
+```
 ### Example
 ```ruby
   class Photo
@@ -293,11 +312,57 @@ And you need to add your serializer to your service using:
 
   service = MyService.new
 
-  p service.find_photo(id: 1).album_id # 1
-  p service.photos.find { |p| p.id == 3 }.id # 1
-  p service.find_post(id: 1).user_id # 1
+  p service.find_photo(id: 1).result.album_id # 1
+  p service.photos.result.find { |p| p.id == 3 }.id # 1
+  p service.find_post(id: 1).result.user_id # 1
 
 ``` 
+
+
+## Response Object
+
+#### Response
+If request was completely sent, the class of response be `RestServiceClient::Response`
+This object has `:status`, `:headers`, `:body` and `:result` fields.
+
+`:status` contains the number(integer) of http status code.
+
+`:headers` contains the http headers from response.
+
+`:body` will be a http body as plain text.
+
+`:result` will contain deserialized http body.
+
+#### ResponseWithError
+If the request failed, the class of response will be RestServiceClient::ResponseWithError
+This object has `:status`, `:headers`, `:body`, `:result` and `:message`
+All fields except of `:message` are equals to `RestServiceClient::Response` fields.
+
+`:message` will contain the string with error message
+
+You are able to check the response before trying to use result to avoid exceptions:
+```ruby
+class SimpleService
+  include RestServiceClient
+  host 'https://jsonplaceholder.typicode.com'
+  get :get_photo, '/photos/:id' 
+  get :bad_url, '/bad_url' 
+end
+
+service = SimpleService.new
+
+response = service.get_photo id: 1
+if response.status == 200
+  p "Photo with name: #{response.result['name']} has been loaded"
+end
+
+response = service.bad_url
+if response.status != 200
+  p "Something was wrong. Reason: #{response.message}"
+  # "Something was wrong. Reason: 404 Not Found" 
+end
+
+```
 
 ## Development
 

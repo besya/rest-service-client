@@ -115,18 +115,36 @@ module RestServiceClient
           puts "|    Payload: #{payload}"
         end
 
-        response = make_request http_method, endpoint, payload, headers
+        begin
+          result = make_request http_method, endpoint, payload, headers
+          response = RestServiceClient::Response.new(
+            result.code,
+            result.headers,
+            result.body,
+            serializer.deserialize(result.body)
+          )
+        rescue RestClient::Exception => e
+          response = RestServiceClient::ResponseWithError.new(
+              e.http_code,
+              e.http_headers,
+              e.http_body,
+              e.http_body,
+              e.message
+          )
+        end
 
         if @debug
           puts '|'
           puts "|  #{self.class.name} is processing the response on #{http_method.upcase} request to #{endpoint}"
-          puts "|    Status: #{response.code}"
-          puts "|    Body: #{response.body}"
+          puts "|    Status: #{response.status}"
+          puts "|    Headers: #{response.headers}"
+          puts "|    Result: #{response.result}"
+          puts "|    Error message: #{response.message}" if response.is_a?(RestServiceClient::ResponseWithError)
           puts '|______'
           puts
         end
 
-        serializer.deserialize(response.body)
+        response
       end
     end
   end
@@ -134,6 +152,25 @@ module RestServiceClient
   class JsonSerializer
     def self.deserialize(data)
       JSON.parse(data)
+    end
+  end
+
+  class Response
+    attr_reader :status, :headers, :body, :result
+
+    def initialize(status, headers, body, result)
+      @status = status
+      @headers = headers
+      @body = body
+      @result = result
+    end
+  end
+
+  class ResponseWithError < Response
+    attr_reader :message
+    def initialize(status, headers, body, result, message)
+      super(status, headers, body, result)
+      @message = message
     end
   end
 end

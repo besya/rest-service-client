@@ -6,6 +6,9 @@ class ServiceClientTest < Minitest::Test
 
     host 'https://jsonplaceholder.typicode.com'
 
+    debug true
+
+    get :bad_url, '/bad_url'
     get :photos, '/photos'
     get :find_photo, '/photos/:id'
     post :add_photo, '/photos'
@@ -48,37 +51,43 @@ class ServiceClientTest < Minitest::Test
     assert @@service.respond_to?(:delete_photo)
   end
 
+  def test_bad_url_methods_can_return_an_error
+    p @@service.bad_url
+    assert_equal 404, @@service.bad_url.status
+  end
+
   def test_get_methods_can_return_a_list
-    assert_equal 5000, @@service.photos.count
+    assert_equal 5000, @@service.photos.result.count
   end
 
   def test_get_methods_can_return_an_object
     object = @@testing_photo_object
-    assert_equal object, @@service.find_photo(id: 1)
+    p @@service.find_photo(id: 1)
+    assert_equal object, @@service.find_photo(id: 1).result
   end
 
   def test_post_method
     new_object = { 'albumId' => 1, 'title' => 'testing photo' }
     expected_result = new_object.clone.merge('id' => 5001)
-    assert_equal expected_result, @@service.add_photo(payload: new_object)
+    assert_equal expected_result, @@service.add_photo(payload: new_object).result
   end
 
   def test_put_method
     updated_object = @@testing_photo_object.clone.merge('albumId' => 2)
     assert_equal updated_object,
-                 @@service.update_photo(id: 1, payload: updated_object)
+                 @@service.update_photo(id: 1, payload: updated_object).result
   end
 
   def test_patch_method
     fields_to_update = { 'albumId' => 2 }
     expected_result = @@testing_photo_object.clone.merge('albumId' => 2)
     assert_equal expected_result,
-                 @@service.update_photo_data(id: 1, payload: fields_to_update)
+                 @@service.update_photo_data(id: 1, payload: fields_to_update).result
   end
 
   def test_delete_method
     empty_hash = {}
-    assert_equal empty_hash, @@service.delete_photo(id: 1)
+    assert_equal empty_hash, @@service.delete_photo(id: 1).result
   end
 
   class Photo
@@ -140,9 +149,9 @@ class ServiceClientTest < Minitest::Test
 
   def test_custom_deserialization
     service = PhotoService.new
-    photo = service.find_photo id: 1
-    last_photo = service.photos.last
-    post = service.find_post(id: 1)
+    photo = service.find_photo(id: 1).result
+    last_photo = service.photos.result.last
+    post = service.find_post(id: 1).result
 
 
     assert_equal 1, photo.album_id
